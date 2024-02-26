@@ -33,9 +33,9 @@ void setup() {
 }
 
 void loop() {
-  bool buttonLeft = digitalRead(32);  //tri-stable switch left
+  bool buttonLeft = digitalRead(35);  //tri-stable switch left
   bool buttonRight = digitalRead(33);  //tri-stable switch right
-  bool buttonBrake = digitalRead(35); // brake switch
+  bool buttonBrake = digitalRead(32); // brake switch
 
   strip.setBrightness(turnBright);
 
@@ -52,9 +52,11 @@ void loop() {
       initLeft = LOW;
     }
 
-    for (int i = 0; i < max(3, int(turnPix)); i++) {
+    for (int i = 0; i < min(3, int(turnPix) + 1); i++) {
       strip.setPixelColor(turnPix - i, orange);
     }
+    turnPix--;
+
     if (turnPix < 0) {
       turnPix = 9;
     }
