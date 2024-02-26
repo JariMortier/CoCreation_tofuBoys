@@ -18,6 +18,7 @@ Adafruit_NeoPixel strip(stripCount, stripPin, NEO_GRB);
 bool initLeft = HIGH;
 bool initRight = HIGH;
 bool catMirror = LOW;
+bool blinker = HIGH;
 uint8_t turnState = 1;
 int16_t turnPix = 0;
 uint32_t white = strip.Color(255, 255, 255);
@@ -33,10 +34,10 @@ void cat_open(bool mirror){
 
   if (mirror){
     for (int i = 0; i < 30; i++){
-      strip.setPixelColor((whites[i] % 16) * 16 + 15 - floor(whites[i] / 16), white);
+      strip.setPixelColor(floor(whites[i] / 16) * 16 + 15 - (whites[i] % 16), white);
     }
     for (int i = 0; i < 6; i++){
-      strip.setPixelColor((pinks[i] % 16) * 16 + 15 - floor(pinks[i] / 16), pink);
+      strip.setPixelColor(floor(pinks[i] / 16) * 16 + 15 - (pinks[i] % 16), pink);
     }
   } else {
     for (int i = 0; i < 30; i++){
@@ -65,11 +66,11 @@ void turn(bool right){ //arg for mirror
 
   if (right){
     for (int i = 0; i < 44; i++){
-      strip.setPixelColor((oranges[i] % 16) * 16 + 15 - floor(oranges[i] / 16), orange);
+      strip.setPixelColor(floor(oranges[i] / 16) * 16 + 15 - (oranges[i] % 16), orange);
     }
   } else {
     for (int i = 0; i < 44; i++){
-      strip.setPixelColor(oranges[i], orange);
+      strip.setPixelColor(oranges[i], orange); // array img[3][16x16] => setpixelcolor(img[0][i], img[1][i], img[2][i])
     }
   }
 }
@@ -94,6 +95,8 @@ void excl4(){
 }
 
 void setup() {
+  millis(); //overflow after 49 days
+  millis(); //overflow after 49 days
   pinMode(32, INPUT);
   pinMode(35, INPUT);
   pinMode(33, INPUT);
@@ -115,7 +118,12 @@ void loop() {
   if(!(buttonBrake || buttonLeft) && !buttonRight){
     if (t1 - t0 >= 1000){
       t0 = millis();
-      catMirror++;
+      if (catMirror){
+        catMirror = LOW;
+      } else {
+        catMirror = HIGH;
+      }
+      Serial.println(catMirror);
     }
     cat_open(catMirror);
   }
@@ -125,37 +133,33 @@ void loop() {
   }
 
   if (buttonLeft) {
-    if (initLeft) {
-      turnPix = 9;
-      initLeft = LOW;
+    if (t1 - t0 >= 600){
+      t0 = millis();
+      if (blinker){
+        blinker = LOW;
+      } else {
+        blinker = HIGH;
+      }
     }
-
-    for (int i = 0; i < min(3, int(turnPix) + 1); i++) {
-      strip.setPixelColor(turnPix - i, orange);
+    if (blinker){
+      turn(LOW);
     }
-    turnPix--;
-
-    if (turnPix < 0) {
-      turnPix = 9;
-    }
-  } else {
-    initLeft = HIGH;
   }
 
   if (buttonRight) {
-    if (initRight) {
-      turnPix = stripCount - 10;
-      initRight = LOW;
+    if (t1 - t0 >= 600){
+      t0 = millis();
+      if (blinker){
+        blinker = LOW;
+      } else {
+        blinker = HIGH;
+      }
     }
-    strip.fill(orange, turnPix, 3);
-    turnPix++;
-    if (turnPix > stripCount) {
-      turnPix = stripCount - 10;
+    if (blinker){
+      turn(HIGH);
     }
-  } else {
-    initRight = HIGH;
   }
 
   strip.show();
-  delay(100);
+  delay(20); // consistency delay 
 }
