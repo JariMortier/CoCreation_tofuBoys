@@ -18,6 +18,7 @@ Adafruit_NeoPixel strip(stripCount, stripPin, NEO_GRB);
 bool blinker = LOW;
 bool initRight = HIGH;
 bool initLeft = HIGH;
+uint16_t yScroll = 0;
 int8_t shiftRight = 0;
 int8_t shiftLeft = 0;
 uint8_t turnState = 1;
@@ -32,9 +33,32 @@ uint32_t t1 = millis();  //overflow after 49 days
 
 // array img[3][16x16] => setpixelcolor(img[0][i], img[1][i], img[2][i])
 
-void cat_open(bool mirror) {
-  const uint8_t whites[] = { 37, 38, 41, 42, 52, 55, 56, 59, 115, 116, 117, 122, 123, 124, 131, 132, 133, 138, 139, 140, 147, 148, 154, 155, 163, 164, 165, 170, 171, 172 };  //len 30
-  const uint8_t pinks[] = { 71, 72, 86, 87, 88, 89 };                                                                                                                         //len 6
+void cat_open(bool mirror, uint8_t yShift) {
+  uint8_t whites[] = { 37, 38, 41, 42, 52, 55, 56, 59, 115, 116, 117, 122, 123, 124, 131, 132, 133, 138, 139, 140, 147, 148, 154, 155, 163, 164, 165, 170, 171, 172 };  //len 30
+  uint8_t pinks[] = { 71, 72, 86, 87, 88, 89 };                                                                                                                     //len 6
+
+  if (yShift != 0) {
+    for (int i = 0; i < 30; i++) {
+      if (int8_t(floor(whites[i] / 16)) % 2 == 0){ // mirror even lines
+        whites[i] = floor(whites[i] / 16) * 16 + 15 - (whites[i] % 16);
+      }
+      whites[i] += 16 * yShift;
+      whites[i] %= 256;
+      if (whites[i] < 0) {
+        whites[i] += 256;
+      }
+    }
+    for (int i = 0; i < 6; i++) {
+      if (int8_t(floor(pinks[i] / 16)) % 2 == 0){ // mirror even lines
+        pinks[i] = floor(pinks[i] / 16) * 16 + 15 - (pinks[i] % 16);
+      }
+      pinks[i] += 16 * yShift;
+      pinks[i] %= 256;
+      if (pinks[i] < 0) {
+        pinks[i] += 256;
+      }
+    }
+  }
 
   if (mirror) {
     for (int i = 0; i < 30; i++) {
@@ -53,9 +77,32 @@ void cat_open(bool mirror) {
   }
 }
 
-void cat_closed() {
-  const uint8_t whites[] = { 37, 38, 41, 42, 52, 55, 56, 59, 114, 118, 121, 125, 131, 133, 138, 140, 148, 155 };  //len 18
-  const uint8_t pinks[] = { 71, 72, 86, 87, 88, 89 };                                                             //len 6
+void cat_closed(uint8_t yShift) {
+  uint8_t whites[] = { 37, 38, 41, 42, 52, 55, 56, 59, 114, 118, 121, 125, 131, 133, 138, 140, 148, 155 };  //len 18
+  uint8_t pinks[] = { 71, 72, 86, 87, 88, 89 };                                                            //len 6
+
+  if (yShift != 0) {
+    for (int i = 0; i < 18; i++) {
+      if (int8_t(floor(whites[i] / 16)) % 2 == 0){ // mirror even lines
+        whites[i] = floor(whites[i] / 16) * 16 + 15 - (whites[i] % 16);
+      }
+      whites[i] += 16 * yShift;
+      whites[i] %= 256;
+      if (whites[i] < 0) {
+        whites[i] += 256;
+      }
+    }
+    for (int i = 0; i < 6; i++) {
+      if (int8_t(floor(pinks[i] / 16)) % 2 == 0){ // mirror even lines
+        pinks[i] = floor(pinks[i] / 16) * 16 + 15 - (pinks[i] % 16);
+      }
+      pinks[i] += 16 * yShift;
+      pinks[i] %= 256;
+      if (pinks[i] < 0) {
+        pinks[i] += 256;
+      }
+    }
+  }
 
   for (int i = 0; i < 18; i++) {
     strip.setPixelColor(whites[i], white);
@@ -65,8 +112,8 @@ void cat_closed() {
   }
 }
 
-void turn_outside(bool right, int8_t colShift) {                                                                                                                                                                                                 //arg for mirror and horizontal shift
-  uint8_t oranges[] = {22, 41, 42, 52, 54, 73, 76, 82, 86, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 110, 112, 127, 128, 143, 145, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 169, 173, 179, 182, 201, 203, 213, 214, 233 };  //len 44
+void turn_outside(bool right, int8_t xShift) {                                                                                                                                                                                          //arg for mirror and horizontal shift
+  uint8_t oranges[] = { 22, 41, 42, 52, 54, 73, 76, 82, 86, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 110, 112, 127, 128, 143, 145, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 169, 173, 179, 182, 201, 203, 213, 214, 233 };  //len 44
 
   if (right) {  //mirror
     for (int i = 0; i < 44; i++) {
@@ -74,12 +121,12 @@ void turn_outside(bool right, int8_t colShift) {                                
     }
   }
 
-  if (colShift != 0) {  // horizontal shift
+  if (xShift != 0) {  // horizontal shift
     for (int i = 0; i < 44; i++) {
-      if (int8_t(floor(oranges[i] / 16)) % 2 == 0){
-        oranges[i] = floor(oranges[i] / 16) * 16 + (oranges[i] - colShift) % 16;
+      if (int8_t(floor(oranges[i] / 16)) % 2 == 0) {
+        oranges[i] = floor(oranges[i] / 16) * 16 + (oranges[i] - xShift) % 16;
       } else {
-        oranges[i] = floor(oranges[i] / 16) * 16 + (oranges[i] + colShift) % 16;
+        oranges[i] = floor(oranges[i] / 16) * 16 + (oranges[i] + xShift) % 16;
       }
     }
   }
@@ -89,8 +136,8 @@ void turn_outside(bool right, int8_t colShift) {                                
   }
 }
 
-void turn_inside(bool right, int8_t colShift) {                                                                                                                                                                                                 //arg for mirror and horizontal shift
-  uint8_t oranges[] = {53, 74, 75, 83, 84, 85, 106, 107, 108, 109, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 146, 147, 148, 149, 170, 171, 172, 180, 181, 202};  //len 48
+void turn_inside(bool right, int8_t colShift) {                                                                                                                                                                                                                      //arg for mirror and horizontal shift
+  uint8_t oranges[] = { 53, 74, 75, 83, 84, 85, 106, 107, 108, 109, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 146, 147, 148, 149, 170, 171, 172, 180, 181, 202 };  //len 48
 
   if (right) {  //mirror
     for (int i = 0; i < 48; i++) {
@@ -100,7 +147,7 @@ void turn_inside(bool right, int8_t colShift) {                                 
 
   if (colShift != 0) {  // horizontal shift
     for (int i = 0; i < 48; i++) {
-      if (int8_t(floor(oranges[i] / 16)) % 2 == 0){
+      if (int8_t(floor(oranges[i] / 16)) % 2 == 0) {
         oranges[i] = floor(oranges[i] / 16) * 16 + (oranges[i] - colShift) % 16;
       } else {
         oranges[i] = floor(oranges[i] / 16) * 16 + (oranges[i] + colShift) % 16;
@@ -176,8 +223,10 @@ void loop() {
 
   strip.fill(0, 0, stripCount);  //clear canvas
 
- if (!(buttonBrake || buttonLeft) && !buttonRight) {
+  if (!(buttonBrake || buttonLeft) && !buttonRight) {
     if (t1 - t0 >= 150) {
+      yScroll += 25;
+      yScroll %= 1600;
       t0 = millis();
       if (random(0, 100) >= 80) {
         catState = uint8_t(random(3));
@@ -185,21 +234,21 @@ void loop() {
     }
     switch (catState) {
       case 0:
-        cat_open(LOW);
+        cat_open(LOW, uint8_t(floor(yScroll / 100)));
         break;
 
       case 1:
-        cat_open(HIGH);
+        cat_open(HIGH, uint8_t(floor(yScroll / 100)));
         break;
 
       case 2:
-        cat_closed();
+        cat_closed(uint8_t(floor(yScroll / 100)));
         break;
     }
   }
 
   if (buttonLeft) {
-    if (initLeft){
+    if (initLeft) {
       initLeft = LOW;
       blinker = HIGH;
       t0 = millis();
@@ -223,7 +272,7 @@ void loop() {
   }
 
   if (buttonRight) {
-    if (initRight){
+    if (initRight) {
       initRight = LOW;
       blinker = HIGH;
       t0 = millis();
@@ -246,7 +295,7 @@ void loop() {
     initRight = HIGH;
   }
 
-  if (buttonBrake) { // move brake button when signaling right and left
+  if (buttonBrake) {  // move brake button when signaling right and left
     excl1();
   }
 
