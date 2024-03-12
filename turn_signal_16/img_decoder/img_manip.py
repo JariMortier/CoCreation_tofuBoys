@@ -16,7 +16,7 @@ for n, i in enumerate(pic_list):
 
 # Open the fucking image
 imgNum = int(input("Nummer van de foto: "))
-image = Image.open(f"turn_signal_16\\img_decoder\\{pic_list[imgNum]}")
+image = Image.open(f"D:\\school\\JAAR3\\CoCreation\\arduino\\turn_signal_16\\img_decoder\\{pic_list[imgNum]}")
 
 # Get data
 pixels = image.load()
@@ -44,10 +44,10 @@ r_string = "{" + ", ".join(r_values) + "}"
 g_string = "{" + ", ".join(g_values) + "}"
 b_string = "{" + ", ".join(b_values) + "}"
 
-with open("matrix_pics\matrix_pics.ino", "r") as text:
+with open("D:\\school\\JAAR3\\CoCreation\\arduino\\matrix_pics\\matrix_pics.ino", "r") as text:
     lines = text.readlines()
 
-with open("matrix_pics\matrix_pics.ino", "w") as text:
+with open("D:\\school\\JAAR3\\CoCreation\\arduino\\matrix_pics\\matrix_pics.ino", "w") as text:
     new_text = ""
     for line in lines:
         if "uint8_t rood[] = " in line:
