@@ -27,5 +27,5 @@ g_string = "{" + ", ".join(g_values) + "}"
 b_string = "{" + ", ".join(b_values) + "}"
 
 with open("rgb.txt", "w") as text:
-    text.write(f"Reds: {r_string} \nGreens: {g_string} \nBlues: {b_string}")
+    text.write(f"uint8_t rood[] = {r_string};\nuint8_t groen[] = {g_string};\nuint8_t blauw[] = {b_string};")
 print("done!")
