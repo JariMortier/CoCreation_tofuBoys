@@ -1,14 +1,35 @@
 from PIL import Image
-from math import *
+import os
+import sys
+
+path = "D:\\school\\JAAR3\\CoCreation\\arduino\\turn_signal_16\\img_decoder"
+dir_list = os.listdir(path)
+pic_list = []
+
+for program in dir_list:
+    if ".png" in str(program):
+        pic_list.append(program)
+
+print("Beschikbare foto's:")
+for n, i in enumerate(pic_list):
+    print(f"{n}: {i}")
 
 # Open the fucking image
-image = Image.open(r"turn_signal_16\img_decoder\mario.png")
+imgNum = int(input("Nummer van de foto: "))
+image = Image.open(f"turn_signal_16\\img_decoder\\{pic_list[imgNum]}")
 
 # Get data
 pixels = image.load()
 
 # Get RGB values
-width, height = image.size
+try:
+    width, height = image.size
+    if width != 16 or height != 16:
+        raise ValueError("Gekozen foto is niet 16 x 16", width, height)
+except ValueError as error:
+    print(error.args)
+    sys.exit("Quit program!")
+
 r_values = []
 g_values = []
 b_values = []
@@ -23,30 +44,26 @@ r_string = "{" + ", ".join(r_values) + "}"
 g_string = "{" + ", ".join(g_values) + "}"
 b_string = "{" + ", ".join(b_values) + "}"
 
-with open("matrix_pics_backup\matrix_pics_backup.ino", "r") as text:
+with open("matrix_pics\matrix_pics.ino", "r") as text:
     lines = text.readlines()
 
-with open("matrix_pics_backup\matrix_pics_backup.ino", "w") as text:
+with open("matrix_pics\matrix_pics.ino", "w") as text:
     new_text = ""
     for line in lines:
-        #print(line)
         if "uint8_t rood[] = " in line:
             new_text += f"uint8_t rood[] = {r_string};\n"
-            print("Found reds")
+            # print("Found reds")
 
         elif "uint8_t groen[] = " in line:
             new_text += f"uint8_t groen[] = {g_string};\n"
-            print("Found greens")
+            # print("Found greens")
 
         elif "uint8_t blauw[] = " in line:
             new_text += f"uint8_t blauw[] = {b_string};\n"
-            print("Found blues")
+            # print("Found blues")
         
         else:
             new_text += line
     text.write(new_text)
 
-
-#with open("rgb.txt", "w") as text:
-#    text.write(f"uint8_t rood[] = {r_string};\nuint8_t groen[] = {g_string};\nuint8_t blauw[] = {b_string};")
-print("done!")
+print(f"Done!\nGekozen foto: {pic_list[imgNum]}")
