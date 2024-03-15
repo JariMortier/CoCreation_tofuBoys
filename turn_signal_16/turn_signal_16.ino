@@ -8,7 +8,7 @@
 #define cols 16                // x
 #define stripCount rows* cols  //amount of neopixels
 
-#define turnBright 20     //initial brightness
+#define turnBright 255     //initial brightness
 #define raveDecrement 10  //raveMode brightness reduction
 
 Adafruit_NeoPixel strip(stripCount, stripPin, NEO_GRB);

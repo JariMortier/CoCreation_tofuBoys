@@ -40,6 +40,11 @@ for y in range(height):
         r_values.append(str(r))
         g_values.append(str(g))
         b_values.append(str(b))
+
+r_values = r_values[::-1]
+g_values = g_values[::-1]
+b_values = b_values[::-1]
+
 r_string = "{" + ", ".join(r_values) + "}"
 g_string = "{" + ", ".join(g_values) + "}"
 b_string = "{" + ", ".join(b_values) + "}"
